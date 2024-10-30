@@ -24,9 +24,11 @@ document.querySelector(
   ".header"
 ).textContent = `${namaHari}, ${date.getDate()} ${namaBulan} ${date.getFullYear()}`;
 
-// Menghitung indeks minggu dalam bulan ini (0-3) dengan siklik
-const mingguKe = (Math.ceil(date.getDate() / 7) - 1) % 4;
+// Menghitung indeks minggu dalam bulan ini (0-3 untuk minggu ke-1 sampai ke-4, lebih dari itu akan ke minggu ke-5)
+let mingguKe = Math.ceil(date.getDate() / 7) - 1;
+const isMingguKelima = mingguKe >= 4;
 
+// Jadwal piket normal (minggu 0-3)
 const jadwal = [
   {
     senin: ["Hasna", "Gumay", "Adinda", "Nilam", "Rizky"],
@@ -46,31 +48,65 @@ const jadwal = [
   },
 ];
 
-// Mendapatkan jadwal untuk minggu saat ini dengan indeks siklik
-const jadwalMingguIni = jadwal[mingguKe] || {};
+// Jika minggu kelima, gunakan algoritma khusus untuk memilih jadwal
+if (isMingguKelima) {
+  const digitKeduaTanggal = String(date.getDate()).slice(-1);
+  const bulanKeberapa = date.getMonth() + 1; // Karena index bulan dari 0
+  const hasilAlgoritma = (Number(digitKeduaTanggal) * bulanKeberapa) % 4; // Menghasilkan indeks 0-3 untuk memilih jadwal
 
-// Menampilkan jadwal untuk hari ini
-if (
-  namaHari.toLowerCase() === "selasa" ||
-  namaHari.toLowerCase() === "minggu"
-) {
-  document.querySelector(".double").textContent =
-    "Tidak ada jadwal hari ini, selamat liburan!!";
-} else {
-  const jadwalHariIni = jadwalMingguIni[namaHari.toLowerCase()];
+  const jadwalMingguKelima = jadwal[hasilAlgoritma]; // Pilih jadwal berdasarkan hasil algoritma
 
-  if (jadwalHariIni) {
-    document.querySelector(".double").textContent = "Jadwal piket hari ini :";
-    jadwalHariIni.forEach((nama) => {
-      const n = document.createElement("li");
-      n.textContent = `${nama}`;
-      n.classList.add("list-group-item");
-      n.classList.add("fw-semibold");
-      root.appendChild(n);
-    });
-  } else {
+  // Menampilkan jadwal untuk hari ini (Senin atau Rabu)
+  if (
+    namaHari.toLowerCase() === "selasa" ||
+    namaHari.toLowerCase() === "minggu"
+  ) {
     document.querySelector(".double").textContent =
-      "Hari ini adalah produktif, semangatt!!";
+      "Tidak ada jadwal hari ini, selamat liburan!!";
+  } else {
+    const jadwalHariIni = jadwalMingguKelima[namaHari.toLowerCase()];
+
+    if (jadwalHariIni) {
+      document.querySelector(".double").textContent =
+        "Jadwal piket hari ini (Karna minggu ke-5 diacak ya piketnya):";
+      jadwalHariIni.forEach((nama) => {
+        const n = document.createElement("li");
+        n.textContent = `${nama}`;
+        n.classList.add("list-group-item");
+        n.classList.add("fw-semibold");
+        root.appendChild(n);
+      });
+    } else {
+      document.querySelector(".double").textContent =
+        "Hari ini adalah produktif, semangatt!!";
+    }
+  }
+} else {
+  // Jika bukan minggu kelima, jalankan logika jadwal normal
+  const jadwalMingguIni = jadwal[mingguKe] || {};
+
+  if (
+    namaHari.toLowerCase() === "selasa" ||
+    namaHari.toLowerCase() === "minggu"
+  ) {
+    document.querySelector(".double").textContent =
+      "Tidak ada jadwal hari ini, selamat liburan!!";
+  } else {
+    const jadwalHariIni = jadwalMingguIni[namaHari.toLowerCase()];
+
+    if (jadwalHariIni) {
+      document.querySelector(".double").textContent = "Jadwal piket hari ini :";
+      jadwalHariIni.forEach((nama) => {
+        const n = document.createElement("li");
+        n.textContent = `${nama}`;
+        n.classList.add("list-group-item");
+        n.classList.add("fw-semibold");
+        root.appendChild(n);
+      });
+    } else {
+      document.querySelector(".double").textContent =
+        "Hari ini adalah produktif, semangatt!!";
+    }
   }
 }
 
